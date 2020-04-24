@@ -1,54 +1,54 @@
-const MongoClient = require('mongodb').MongoClient;
-const assert = require('assert');
+const mongoose = require("mongoose");
+mongoose.connect("mongodb://localhost:27017/fruitsDB", { useNewUrlParser: true, useUnifiedTopology: true})
 
-// Connection URL
-const url = 'mongodb://localhost:27017';
-
-// Database Name
-const dbName = 'fruits';
-
-// Create a new MongoClient
-const client = new MongoClient(url, { useUnifiedTopology: true });
-
-// Use connect method to connect to the Server
-client.connect(function(err) {
-  assert.equal(null, err);
-  console.log("Connected successfully to server");
-  const db = client.db(dbName);
-
-  insertDocuments(db, function() {
-    findDocuments(db, function() {
-      client.close();
-    });
+  const fruitSchema = mongoose.Schema({
+    name: String,
+    rating: Number,
+    review: String
   });
 
+  const Fruit = mongoose.model("Fruit", fruitSchema);
+
+  const Apples = new Fruit({
+    name: "Apples",
+    rating: 7,
+    review: "Not bad, also healthy."
+  });
+
+  const Oranges = new Fruit({
+    name: "Oranges",
+    rating: 8,
+    review: "I like it. "
+  });
+
+  // Fruit.insertMany([Apples,Oranges], function(err){
+  //   if(err)
+  //     console.log(err);
+  //   else
+  //     console.log("Sucessfully inserted multiple records.")
+  // })
+  //fruit.save();
+
+
+const personSchema = mongoose.Schema({
+  name: String,
+  Age: Number
 });
 
-const insertDocuments = function(db, callback) {
-  // Get the documents collection
-  const collection = db.collection('documents');
-  // Insert some documents
-  collection.insertMany([
-    {name : "Apples", Score: 5},
-    {name : "Banana", Score: 4},
-    {name : "Oranges", Score: 3},
-  ], function(err, result) {
-    assert.equal(err, null);
-    assert.equal(3, result.result.n);
-    assert.equal(3, result.ops.length);
-    console.log("Inserted 3 documents into the collection");
-    callback(result);
-  });
-}
+const Person = mongoose.model("Person", personSchema);
+const person = new Person({
+  name: "Jesus Christ",
+  Age: 2053
+});
+//person.save();
 
-const findDocuments = function(db, callback) {
-  // Get the documents collection
-  const collection = db.collection('documents');
-  // Find some documents
-  collection.find({}).toArray(function(err, docs) {
-    assert.equal(err, null);
-    console.log("Found the following records");
-    console.log(docs)
-    callback(docs);
+Fruit.find(function(err, fruits){
+  if(err){
+    console.log(err);
+  }else{
+      mongoose.connection.close();
+      fruits.forEach(function(fruit){
+        console.log(fruit.name);
+      })
+    }
   });
-}
